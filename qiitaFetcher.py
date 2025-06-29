@@ -2,7 +2,7 @@ import requests
 import random
 from datetime import datetime
 
-def get_qiita_articles(tag=None, num=10):
+def get_qiita_articles(tag=None, num=10, raw=False):
     if tag:
         url = f"https://qiita.com/api/v2/tags/{tag}/items"
         params = {"per_page": 100}
@@ -16,6 +16,9 @@ def get_qiita_articles(tag=None, num=10):
     if not items:
         return None
 
+    if raw:
+        return items  # ← ここがポイント！
+
     pick_items = random.sample(items, min(num, len(items)))
     messages = []
     for i, item in enumerate(pick_items, 1):
@@ -25,7 +28,7 @@ def get_qiita_articles(tag=None, num=10):
         dt = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
         messages.append(f"**{i}. {title}**\n{page_url}\n投稿: {dt.strftime('%Y-%m-%d %H:%M')}\n")
     return "\n".join(messages)
-
+    
 def make_qiita_embeds(items, num=10):
     import discord
     pick_items = random.sample(items, min(num, len(items)))
