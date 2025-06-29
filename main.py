@@ -1,7 +1,7 @@
 import discord
 import asyncio
 from config import DISCORD_BOT_TOKEN, CHANNEL_ID
-from qiitaFetcher import get_qiita_articles
+from qiitaFetcher import get_qiita_articles, make_qiita_embeds
 from datetime import datetime, timedelta
 
 intents = discord.Intents.default()
