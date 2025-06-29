@@ -18,9 +18,12 @@ async def daily_post():
         wait_seconds = (target_time - now).total_seconds()
         await asyncio.sleep(wait_seconds)
         channel = client.get_channel(CHANNEL_ID)
-        msg = get_qiita_articles(tag=None, num=10)
-        if msg:
-            await channel.send("【Qiita 新着記事ピックアップ】\n" + msg)
+        items = get_qiita_articles(tag=None, num=10, raw=True)
+        if items:
+            embeds = make_qiita_embeds(items, num=10)
+            await channel.send("【Qiita 新着記事ピックアップ】")
+            for embed in embeds:
+                await channel.send(embed=embed)
         else:
             await channel.send("記事が取得できませんでした。")
 
@@ -28,6 +31,7 @@ async def daily_post():
 async def on_ready():
     print(f"ログインしました: {client.user}")
     client.loop.create_task(daily_post())
+
 
 @client.event
 async def on_message(message):
@@ -37,10 +41,13 @@ async def on_message(message):
     if message.content.startswith('!qiita'):
         parts = message.content.split()
         tag = parts[1] if len(parts) > 1 else None
-        msg = get_qiita_articles(tag=tag, num=10)
-        if msg:
-            await message.channel.send("【Qiitaピックアップ】\n" + msg)
+
+        # Embed用に生データを取得
+        items = get_qiita_articles(tag=tag, num=10, raw=True)
+        if items:
+            embeds = make_qiita_embeds(items, num=10)
+            for embed in embeds:
+                await message.channel.send(embed=embed)
         else:
             await message.channel.send("記事が取得できませんでした。")
-
 client.run(DISCORD_BOT_TOKEN)
